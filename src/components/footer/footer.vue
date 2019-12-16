@@ -1,5 +1,5 @@
 <template>
-    <footer class="footer_guide border-1px">
+    <footer class="footer_guide" v-show="$route.meta.isShowFooter">
         <div class="navs">
             <router-link to="/msite">
                 <a href="javascript:;" class="guide_item">
@@ -48,6 +48,7 @@
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
+    @import "../../comment/stylus/mixins.styl"
     .router-link-active {
         span {
             color #02a774 !important
@@ -55,8 +56,7 @@
     }
 
     .footer_guide {
-        top-border-1px(#e4e4e4)
-        position fixed
+        position fixed !important
         z-index 100
         left 0
         right 0
@@ -65,7 +65,7 @@
         width 100%
         height 50px
         display flex
-
+        top-border-1px(#cccccc)
         .navs {
             width 90%
             margin 0 auto

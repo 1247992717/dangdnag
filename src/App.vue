@@ -1,9 +1,5 @@
 <template>
     <div>
-        <header>
-
-        </header>
-
         <main>
             <router-view></router-view>
         </main>
@@ -13,12 +9,10 @@
 </template>
 
 <script>
-    import Footer from "./components/footer"
+    import Footer from "./components/footer/footer"
     export default {
-        data() {
-            return {
-                
-            }
+        mounted(){
+
         },
         components:{
             Footer
@@ -27,7 +21,6 @@
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
-    @import "./comment/stylus/mixins.styl"
 
 </style>
 
