@@ -8,6 +8,7 @@ const postcss = px2rem({
 
 module.exports = {
     runtimeCompiler:false,
+
     css: { // 添加postcss配置
         loaderOptions: {
             postcss: {
@@ -17,6 +18,7 @@ module.exports = {
             }
         }
     },
+
     configureWebpack: { // 内部写webpack原生配置
         resolve: {
             extensions: ['.js', '.vue', '.json'], // 可以省略的后缀名
@@ -27,6 +29,7 @@ module.exports = {
             }
         }
     },
+
     devServer: {
         proxy: {
             // 处理以/api开头路径的请求
@@ -38,5 +41,14 @@ module.exports = {
                 changeOrigin: true, // 支持跨域, 如果协议/主机也不相同, 必须加上
             },
         }
+    },
+
+    pluginOptions: {
+      i18n: {
+        locale: 'zh_CN',
+        fallbackLocale: 'en',
+        localeDir: 'locales',
+        enableInSFC: false
+      }
     }
 }

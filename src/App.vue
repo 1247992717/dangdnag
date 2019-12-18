@@ -12,7 +12,7 @@
     import Footer from "./components/footer/footer"
     export default {
         mounted(){
-
+            this.$store.dispatch('autoLogin')
         },
         components:{
             Footer

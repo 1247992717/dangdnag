@@ -9,7 +9,7 @@
                 </div>
             </div>
             <div class="login_content">
-                <form @submit.prevent="submit">
+                <form @submit.prevent="submit" @keyup.enter="submit">
                     <div :class="{on:!isShowRight}" @click="isShowRight=false">
                         <section class="login_message">
                             <input
@@ -27,19 +27,16 @@
                             <span style="color: red;" v-show="errors.has('phone')">
                                 {{ errors.first('phone') }}
                             </span>
-                            <button
-                                class="get_verification"
-                                :class="{right_phone_number:phoneIsRight}"
-                                @click.prevent="getCode"
-                            >
-                                获取验证码
-                                <span ref="countDown" v-show="showCountDown">({{countDown}})</span>
+                            <button :disabled="!phoneIsRight || countDown>0" class="get_verification"
+                                    :class="{right_phone_number: phoneIsRight}" @click.prevent="sendCode">
+                                {{countDown>0 ? `短信已发送(${countDown}s)` : '发送验证码'}}
                             </button>
 
                         </section>
                         <section class="login_verification">
                             <input
                                 name="phoneCode"
+                                v-model="code"
                                 type="tel"
                                 maxlength="8"
                                 placeholder="验证码"
@@ -61,12 +58,11 @@
                         <section>
                             <section class="login_message">
                                 <input
-                                    v-model="emailOrphoneOrusername"
+                                    v-model="name"
                                     type="text"
                                     name="email"
                                     v-validate="{
-                                        required:true,
-                                        regex: /^1\d{10}$/
+                                        required:true
                                     }"
                                     data-vv-as="手机/邮箱/用户名"
                                     maxlength="11"
@@ -89,26 +85,27 @@
                                 <span style="color: red;" v-show="errors.has('pwd')">
                                     {{ errors.first('pwd') }}
                                 </span>
-                                <div class="switch_button" :class="{off:!isShowRightPwd,on:isShowRightPwd}" @click="isShowRightPwd = !isShowRightPwd">
+                                <div class="switch_button" :class="{off:!isShowRightPwd,on:isShowRightPwd}"
+                                     @click="isShowRightPwd = !isShowRightPwd">
                                     <div class="switch_circle"></div>
                                     <span class="switch_text">...</span>
                                 </div>
                             </section>
                             <section class="login_message">
                                 <input
-                                    v-model="code"
-                                    name="code"
+                                    v-model="captcha"
+                                    name="captcha"
                                     v-validate="{
                                         required: true,
-
                                     }"
                                     data-vv-as="验证码"
                                     type="text"
                                     maxlength="11" placeholder="验证码">
-                                <span style="color: red;" v-show="errors.has('code')">
-                                    {{ errors.first('code') }}
+                                <span style="color: red;" v-show="errors.has('captcha')">
+                                    {{ errors.first('captcha') }}
                                 </span>
-                                <img class="get_verification" src="./captcha.svg" alt="captcha">
+                                <img class="get_verification" src="http://localhost:4000/captcha" alt="captcha"
+                                     @click="getCaptcha" ref="captcha">
                             </section>
                         </section>
                     </div>
@@ -125,48 +122,87 @@
 </template>
 
 <script type="text/ecmascript-6">
+    import {reqCode} from "@/api"
+    import {Toast, MessageBox} from "mint-ui"
+    import {mapState} from "vuex"
+    import {reqLogin_pwd, reqLogin_sms} from "@/api"
+
     export default {
         data() {
             return {
-                emailOrphoneOrusername: "",
+                name: "",
                 pwd: "",
+                captcha: "",
                 code: "",
                 phone: "",
                 isShowRight: true, //显示右侧
-                isShowRightPwd:false,
-                countDown:60,
-                showCountDown:false
+                isShowRightPwd: false,
+                countDown: 0,
+                showCountDown: false
             }
         },
         computed: {
+            ...mapState(["user"]),
             phoneIsRight() {
                 return /^1\d{10}$/.test(this.phone);
             }
         },
-        mounted() {
-
-        },
         methods: {
+            getCaptcha() {
+                this.$refs.captcha.src = "http://localhost:4000/captcha?name=" + Date.now();
+            },
             async submit() {
-                if(this.isShowRight){
-                    const success = await this.$validator.validateAll(["email","pwd","code"])
+                console.log(this.$router);
+                let names = null;
+                if (this.isShowRight) {
+                    names = ["email", "pwd", "captcha"]
                 } else {
-                    const success = await this.$validator.validateAll(["phone","phoneCode"])
+                    names = ["phone", "phoneCode"]
+                }
+                const sucess = await this.$validator.validateAll(names)
+                let result;
+                if (sucess) {
+                    if (this.isShowRight) {
+                        const {name, pwd, captcha} = this
+                        result = await reqLogin_pwd({name, pwd, captcha});
+
+                    } else {
+                        const {phone, code} = this;
+                        result = await reqLogin_sms({phone, code});
+                    }
+
+                    console.log(result);
+                    if (result.code === 0) {
+                        const user = result.data;
+                        this.$store.dispatch("getUser", user);
+                        this.$router.replace({ path: "/profile" });
+                    } else {
+                        this.captcha = "";
+                        this.getCaptcha()
+                        MessageBox("提示", result.msg)
+                    }
                 }
             },
-            getCode(){
-                if(!this.phoneIsRight || this.timer) return;
-                this.showCountDown = true;
-                this.timer = setInterval(() => {
-                    this.countDown--;
-                    this.$refs.countDown.innerText;
-                    if(this.countDown <= 0){
-                        clearInterval(this.timer);
-                        this.countDown = 60;
-                        this.showCountDown = false;
-                        this.timer = undefined;
+            async sendCode() {
+                // 进行倒计时效果显示
+                this.countDown = 10
+                const intervalId = setInterval(() => {
+                    this.countDown--
+                    if (this.countDown <= 0) {
+                        this.countDown = 0
+                        clearInterval(intervalId)
                     }
-                },1000)
+                }, 1000);
+
+                // 发请求
+                const result = await reqCode(this.phone)
+                if (result.code === 0) {
+                    Toast('验证码短信已发送');
+                } else {
+                    // 停止倒计时
+                    this.countDown = 0
+                    MessageBox('提示', result.msg || '发送失败');
+                }
             }
         }
     }
@@ -282,7 +318,8 @@
                                     background #02a774
 
                                     .switch_text
-                                        display:none
+                                        display: none
+
                                     .switch_circle
                                         transform translateX(27px)
 
