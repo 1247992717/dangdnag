@@ -20,7 +20,7 @@
                     <li class="food-list-hook" v-for="(item,index) in goods" :key="index">
                         <h1 class="title">{{item.name}}</h1>
                         <ul>
-                            <li class="food-item bottom-border-1px" v-for="(food,index) in item.foods" :key="index">
+                            <li class="food-item bottom-border-1px" v-for="(food,index) in item.foods" :key="index" @click="showFood(food)">
                                 <div class="icon">
                                     <img width="57" height="57" :src="food.image">
                                 </div>
@@ -35,7 +35,7 @@
                                         <span class="old" v-if="food.oldPrice">￥{{food.oldPrice}}</span>
                                     </div>
                                     <div class="cartcontrol-wrapper">
-                                        CartControl组件
+                                        <CartControl :food="food"/>
                                     </div>
                                 </div>
                             </li>
@@ -44,6 +44,8 @@
                 </ul>
             </div>
         </div>
+        <ShopCart/>
+        <Food :food="food" :toggleShowFood="toggleShowFood" v-if="isShowFood"/>
     </div>
 
 </template>
@@ -51,19 +53,34 @@
 <script>
     import {mapState} from "vuex"
     import BScroll from 'better-scroll'
+    import Food from "@/components/food/food"
+    import ShopCart from "@/components/shopCart/shopCart"
     export default {
         data(){
             return {
                 rightTops:[0],
                 scrollY:0,
+                food:[],
+                isShowFood:false
             }
         },
         computed:{
-            ...mapState(["goods"]),
+            // ...mapState(["goods"]),
+            ...mapState({
+                goods:state => state.shop.goods
+            }),
             currentIndex(){
                 const {rightTops,scrollY} = this;
-                return rightTops.findIndex((top,index) => scrollY >= rightTops[index] && scrollY < rightTops[index + 1])
+                const index = rightTops.findIndex((top,index) => scrollY >= rightTops[index] && scrollY < rightTops[index + 1])
 
+                if (index!==this.index && this.leftScroll) {
+                    // 将新的下标保存起来
+                    this.index = index
+                    // 让左侧列表滑动到当前分类处
+                    const li = this.$refs.leftUl.children[index]
+                    this.leftScroll.scrollToElement(li, 300)
+                }
+                return index
             }
         },
         methods:{
@@ -82,10 +99,11 @@
                 })
             },
             initScroll(){
-                new BScroll(this.$refs.left,{
+                this.leftScroll = new BScroll(this.$refs.left,{
                     click:true
                 })
                 this.rightScroll = new BScroll(this.$refs.right,{
+                    click:true,
                     probeType:1
                 })
 
@@ -96,6 +114,13 @@
                 this.rightScroll.on("scrollEnd",({y}) => {
                     this.scrollY = Math.abs(y)
                 })
+            },
+            showFood(food){
+                this.food = food
+                this.toggleShowFood()
+            },
+            toggleShowFood(){
+                this.isShowFood = !this.isShowFood
             }
         },
         watch:{
@@ -105,13 +130,16 @@
                     this.initTops();
                 })
             }
+        },
+        components:{
+            Food,
+            ShopCart
         }
     }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
     @import "../../comment/stylus/mixins.styl"
-
     .goods
         display: flex
         position: absolute

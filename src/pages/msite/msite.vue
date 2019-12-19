@@ -100,7 +100,12 @@
     import Star from "../../components/star/star"
     export default {
         computed: {
-            ...mapState(["address", "shops", "categorys"]),
+            // ...mapState(["address", "shops", "categorys"]),
+            ...mapState({
+                address:state => state.msite.address,
+                shops:state => state.msite.shops,
+                categorys:state => state.msite.categorys,
+            }),
             categurysArr() {
                 const bigArr = [];
                 let smallArr = [];
