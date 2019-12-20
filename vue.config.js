@@ -25,7 +25,7 @@ module.exports = {
             alias: { // 路径别名(简写方式)
                 // 'vue$': 'vue/dist/vue.esm.js',  // 表示精准匹配   带vue编译器
                 '@': path.resolve(__dirname, 'src'),
-                '@components': path.resolve(__dirname, 'src/components'),
+                '@components': path.resolve(__dirname, 'src1111111/components'),
             }
         }
     },
