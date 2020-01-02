@@ -1,28 +1,23 @@
 <template>
-  <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
-  </div>
+    <div>
+        <JinRiChuXiao/>
+    </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
-export default {
-  name: 'app',
-  components: {
-    HelloWorld
-  }
-}
+    import ZhiDeMai from "./pages/zhiDeMai/zhiDeMai"
+    import TeJiaShuShi from "./pages/teJiaShuShi/teJiaShuShi"
+    import JinRiChuXiao from "./pages/jinRiCuXiao/jinRiCuXiao"
+    export default {
+        components:{
+            JinRiChuXiao
+        }
+    }
 </script>
 
-<style>
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
+<style lang="stylus" rel="stylesheet/stylus">
+    body
+        background-color #f5f5f5
+        height 100%
 </style>
+
