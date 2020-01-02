@@ -1,26 +1,23 @@
 <template>
     <div>
-        <main>
-            <router-view></router-view>
-        </main>
-
-       <Footer/>
+        <JinRiChuXiao/>
     </div>
 </template>
 
 <script>
-    import Footer from "./components/footer/footer"
+    import ZhiDeMai from "./pages/zhiDeMai/zhiDeMai"
+    import TeJiaShuShi from "./pages/teJiaShuShi/teJiaShuShi"
+    import JinRiChuXiao from "./pages/jinRiCuXiao/jinRiCuXiao"
     export default {
-        mounted(){
-            this.$store.dispatch('autoLogin')
-        },
         components:{
-            Footer
+            JinRiChuXiao
         }
     }
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
-
+    body
+        background-color #f5f5f5
+        height 100%
 </style>
 

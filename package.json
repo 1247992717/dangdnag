@@ -12,6 +12,7 @@
     "axios": "^0.19.0",
     "better-scroll": "^1.15.2",
     "core-js": "^3.4.3",
+    "dayjs": "^1.8.18",
     "lib-flexible": "^0.3.2",
     "mint-ui": "^2.2.13",
     "mockjs": "^1.1.0",
